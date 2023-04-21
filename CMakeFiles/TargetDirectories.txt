@@ -1,0 +1,7 @@
+/home/josh/programming/cpp/orbits_port/CMakeFiles/orbits_port.dir
+/home/josh/programming/cpp/orbits_port/CMakeFiles/edit_cache.dir
+/home/josh/programming/cpp/orbits_port/CMakeFiles/rebuild_cache.dir
+/home/josh/programming/cpp/orbits_port/CMakeFiles/list_install_components.dir
+/home/josh/programming/cpp/orbits_port/CMakeFiles/install.dir
+/home/josh/programming/cpp/orbits_port/CMakeFiles/install/local.dir
+/home/josh/programming/cpp/orbits_port/CMakeFiles/install/strip.dir
