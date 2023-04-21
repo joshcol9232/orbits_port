@@ -2,8 +2,8 @@
 #include <cmath>
 #include <iostream>
 
-#define G 0.00000001
-#define PLANET_DENSITY 1.0
+#define G 0.01
+#define PLANET_DENSITY 1000.0
 
 // Utility functions
 namespace {
@@ -23,12 +23,12 @@ Body::Body(Vector2f pos, Vector2f velocity, float radius) :
 
 Body::Body(Vector2f pos, Vector2f velocity,
            float radius, float mass) :
-  x_(pos), v_(velocity), mass_(mass), radius_(radius)
+  x_(pos), v_(velocity), mass_(mass), radius_(radius), force_(0.0, 0.0)
 {}
 
 void Body::step(const float dt) {
   // F = ma
-  v_ += (force_ / mass_) * dt;
+  v_ += force_ * dt/mass_;
   x_ += v_ * dt;
 
   // Reset resultant force
@@ -37,7 +37,6 @@ void Body::step(const float dt) {
 }
 
 void Body::draw(sf::RenderWindow& window, sf::CircleShape& circle_mesh) const {
-  std::cout << x_.x() << ", " << x_.y() << std::endl;
   circle_mesh.setPosition(x_.x(), x_.y());
   circle_mesh.setScale(radius_, radius_);
   circle_mesh.setFillColor(sf::Color::White);
@@ -65,8 +64,9 @@ void Body::inelastic_collide_with(const Body& other) {
   const Vector2f total_momentum = mass_ * v_ + other.mass_ * other.v_;
   radius_ = radius_of_sphere(total_mass/PLANET_DENSITY);
   // Use centre of mass as new position
-  x_.x() = x_.x() * mass_ + other.x_.x() * other.mass_/total_mass;
-  x_.y() = x_.y() * mass_ + other.x_.y() * other.mass_/total_mass;
+  x_.x() = (x_.x() * mass_ + other.x_.x() * other.mass_)/total_mass;
+  x_.y() = (x_.y() * mass_ + other.x_.y() * other.mass_)/total_mass;
+  std::cout << "New position: " << x_.x() << ", " << x_.y() << std::endl;
 
   v_ = total_momentum/total_mass;   // Inelastic collision
   mass_ = total_mass;

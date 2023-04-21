@@ -22,7 +22,7 @@ public:
   void get_transform(sf::Transform& tr) const;
   float get_radius() const { return radius_; }
 
-private:
+// private:
   Vector2f x_, v_, force_;
   float mass_, radius_;
 };

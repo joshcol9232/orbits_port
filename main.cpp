@@ -17,7 +17,7 @@ int main() {
   bodies.emplace_back(Vector2f(100.0, 100.0),
                       Vector2f(10.0, 0.0),
                       10.0);
-  bodies.emplace_back(Vector2f(800.0, 600.0),
+  bodies.emplace_back(Vector2f(100.1, 200.0),
                       Vector2f(10.0, 0.0),
                       10.0);
 
@@ -49,27 +49,25 @@ int main() {
     for (size_t i = 0; i < bodies.size()-1; ++i) {
       for (size_t j = i+1; j < bodies.size(); ++j) {
         grav = bodies[i].force_with(bodies[j], dist);
-        // bodies[i].apply_force(grav);
+        bodies[i].apply_force(grav);
         // Equal and opposite force
-        // bodies[j].apply_force(-grav);
+        bodies[j].apply_force(-grav);
 
-        // collision_res.process_pair(i, j, bodies[i], bodies[j], dist);
+        collision_res.process_pair(i, j, bodies[i], bodies[j], dist);
       }
     }
 
     // Apply collisions
-    // collision_res.apply_collisions(bodies);
+    collision_res.apply_collisions(bodies);
 
     // Euler step
     for (auto& body : bodies) {
-      std::cout << "FPS:\t" << 1.0/dt << std::endl;
       body.step(dt);
     }
 
     // Draw
     window.clear(sf::Color::Black);
 
-    std::cout << bodies.size() << std::endl;
     for (const auto& body : bodies) {
       body.draw(window, body_shape);
     }
