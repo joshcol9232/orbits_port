@@ -174,6 +174,30 @@ orbits_port/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/orbits_port.dir/build.make CMakeFiles/orbits_port.dir/build
 .PHONY : orbits_port/fast
 
+body.o: body.cpp.o
+.PHONY : body.o
+
+# target to build an object file
+body.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/orbits_port.dir/build.make CMakeFiles/orbits_port.dir/body.cpp.o
+.PHONY : body.cpp.o
+
+body.i: body.cpp.i
+.PHONY : body.i
+
+# target to preprocess a source file
+body.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/orbits_port.dir/build.make CMakeFiles/orbits_port.dir/body.cpp.i
+.PHONY : body.cpp.i
+
+body.s: body.cpp.s
+.PHONY : body.s
+
+# target to generate assembly for a file
+body.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/orbits_port.dir/build.make CMakeFiles/orbits_port.dir/body.cpp.s
+.PHONY : body.cpp.s
+
 main.o: main.cpp.o
 .PHONY : main.o
 
@@ -211,6 +235,9 @@ help:
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
 	@echo "... orbits_port"
+	@echo "... body.o"
+	@echo "... body.i"
+	@echo "... body.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

@@ -1,6 +1,12 @@
-CMakeFiles/orbits_port.dir/main.cpp.o: \
- /home/josh/programming/cpp/orbits_port/main.cpp \
- /usr/include/stdc-predef.h /usr/include/c++/12.2.1/iostream \
+CMakeFiles/orbits_port.dir/body.cpp.o: \
+ /home/josh/programming/cpp/orbits_port/body.cpp \
+ /usr/include/stdc-predef.h /home/josh/programming/cpp/orbits_port/body.h \
+ /usr/include/SFML/Graphics.hpp /usr/include/SFML/Window.hpp \
+ /usr/include/SFML/System.hpp /usr/include/SFML/Config.hpp \
+ /usr/include/SFML/System/Clock.hpp /usr/include/SFML/System/Export.hpp \
+ /usr/include/SFML/System/Time.hpp /usr/include/SFML/System/Err.hpp \
+ /usr/include/c++/12.2.1/ostream /usr/include/c++/12.2.1/ios \
+ /usr/include/c++/12.2.1/iosfwd \
  /usr/include/c++/12.2.1/x86_64-pc-linux-gnu/bits/c++config.h \
  /usr/include/c++/12.2.1/x86_64-pc-linux-gnu/bits/os_defines.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -9,8 +15,7 @@ CMakeFiles/orbits_port.dir/main.cpp.o: \
  /usr/include/gnu/stubs.h /usr/include/gnu/stubs-64.h \
  /usr/include/c++/12.2.1/x86_64-pc-linux-gnu/bits/cpu_defines.h \
  /usr/include/c++/12.2.1/pstl/pstl_config.h \
- /usr/include/c++/12.2.1/ostream /usr/include/c++/12.2.1/ios \
- /usr/include/c++/12.2.1/iosfwd /usr/include/c++/12.2.1/bits/stringfwd.h \
+ /usr/include/c++/12.2.1/bits/stringfwd.h \
  /usr/include/c++/12.2.1/bits/memoryfwd.h \
  /usr/include/c++/12.2.1/bits/postypes.h /usr/include/c++/12.2.1/cwchar \
  /usr/include/wchar.h /usr/include/bits/libc-header-start.h \
@@ -130,16 +135,7 @@ CMakeFiles/orbits_port.dir/main.cpp.o: \
  /usr/include/c++/12.2.1/x86_64-pc-linux-gnu/bits/ctype_inline.h \
  /usr/include/c++/12.2.1/bits/locale_facets.tcc \
  /usr/include/c++/12.2.1/bits/basic_ios.tcc \
- /usr/include/c++/12.2.1/bits/ostream.tcc /usr/include/c++/12.2.1/istream \
- /usr/include/c++/12.2.1/bits/istream.tcc /usr/include/c++/12.2.1/vector \
- /usr/include/c++/12.2.1/bits/stl_uninitialized.h \
- /usr/include/c++/12.2.1/bits/stl_vector.h \
- /usr/include/c++/12.2.1/bits/stl_bvector.h \
- /usr/include/c++/12.2.1/bits/vector.tcc /usr/include/SFML/Graphics.hpp \
- /usr/include/SFML/Window.hpp /usr/include/SFML/System.hpp \
- /usr/include/SFML/Config.hpp /usr/include/SFML/System/Clock.hpp \
- /usr/include/SFML/System/Export.hpp /usr/include/SFML/System/Time.hpp \
- /usr/include/SFML/System/Err.hpp \
+ /usr/include/c++/12.2.1/bits/ostream.tcc \
  /usr/include/SFML/System/FileInputStream.hpp \
  /usr/include/SFML/System/InputStream.hpp \
  /usr/include/SFML/System/NonCopyable.hpp \
@@ -182,7 +178,11 @@ CMakeFiles/orbits_port.dir/main.cpp.o: \
  /usr/include/SFML/Window/Joystick.hpp \
  /usr/include/SFML/Window/Keyboard.hpp /usr/include/SFML/Window/Mouse.hpp \
  /usr/include/SFML/Window/Sensor.hpp /usr/include/SFML/Window/Touch.hpp \
- /usr/include/SFML/Window/VideoMode.hpp \
+ /usr/include/SFML/Window/VideoMode.hpp /usr/include/c++/12.2.1/vector \
+ /usr/include/c++/12.2.1/bits/stl_uninitialized.h \
+ /usr/include/c++/12.2.1/bits/stl_vector.h \
+ /usr/include/c++/12.2.1/bits/stl_bvector.h \
+ /usr/include/c++/12.2.1/bits/vector.tcc \
  /usr/include/SFML/Window/Window.hpp \
  /usr/include/SFML/Window/WindowHandle.hpp \
  /usr/include/SFML/Window/WindowStyle.hpp \
@@ -248,7 +248,9 @@ CMakeFiles/orbits_port.dir/main.cpp.o: \
  /usr/lib/gcc/x86_64-pc-linux-gnu/12.2.1/include/xmmintrin.h \
  /usr/lib/gcc/x86_64-pc-linux-gnu/12.2.1/include/mm_malloc.h \
  /usr/include/c++/12.2.1/stdlib.h /usr/include/c++/12.2.1/complex \
- /usr/include/c++/12.2.1/sstream /usr/include/c++/12.2.1/bits/sstream.tcc \
+ /usr/include/c++/12.2.1/sstream /usr/include/c++/12.2.1/istream \
+ /usr/include/c++/12.2.1/bits/istream.tcc \
+ /usr/include/c++/12.2.1/bits/sstream.tcc \
  /usr/include/eigen3/Eigen/src/Core/util/MKL_support.h \
  /usr/include/c++/12.2.1/cstddef /usr/include/c++/12.2.1/cassert \
  /usr/include/assert.h /usr/include/c++/12.2.1/functional \
@@ -450,6 +452,4 @@ CMakeFiles/orbits_port.dir/main.cpp.o: \
  /usr/include/eigen3/Eigen/src/Eigenvalues/RealQZ.h \
  /usr/include/eigen3/Eigen/src/Eigenvalues/GeneralizedEigenSolver.h \
  /usr/include/eigen3/Eigen/src/Eigenvalues/RealQZ.h \
- /usr/include/eigen3/Eigen/src/Eigenvalues/MatrixBaseEigenvalues.h \
- /home/josh/programming/cpp/orbits_port/common.h \
- /home/josh/programming/cpp/orbits_port/body.h
+ /usr/include/eigen3/Eigen/src/Eigenvalues/MatrixBaseEigenvalues.h

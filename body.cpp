@@ -1,6 +1,6 @@
 #include "body.h"
 
-#define G 0.001
+#define G 100.1
 
 Body::Body(Vector2f pos, Vector2f velocity,
            float mass, float radius) :
@@ -8,7 +8,6 @@ Body::Body(Vector2f pos, Vector2f velocity,
 {}
 
 void Body::step(const float dt) {
-  // Euler
   // F = ma
   v_ += (force_ / mass_) * dt;
   x_ += v_ * dt;
@@ -25,6 +24,13 @@ Vector2f Body::force_with(const Body& other) const {
   Vector2f force = other.x_ - x_;
   const float distance = force.norm();
   force *= G * mass_ * other.mass_ / (distance*distance*distance);
+  return force;
 }
 
+sf::Transform Body::get_transform() const {
+  sf::Transform tr;
+  tr.translate(x_.x(), x_.y());
+  tr.scale(radius_, radius_);
+  return tr;
+}
 
