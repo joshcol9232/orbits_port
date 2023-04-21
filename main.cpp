@@ -5,7 +5,8 @@
 #include <Eigen/Dense>
 
 #include "common.h"
-#include "body.h"
+#include "Body.h"
+#include "CollisionResolver.h"
 
 using Eigen::Vector2f;
 
@@ -15,22 +16,23 @@ int main() {
   std::vector<Body> bodies;
   bodies.emplace_back(Vector2f(100.0, 100.0),
                       Vector2f(10.0, 0.0),
-                      1000.0,
                       10.0);
-  bodies.emplace_back(Vector2f(100.0, 200.0),
+  bodies.emplace_back(Vector2f(800.0, 600.0),
                       Vector2f(10.0, 0.0),
-                      1000.0,
                       10.0);
 
   // Create assets
-  sf::CircleShape body_shape(1.0f);
-  body_shape.setPointCount(200);
+  sf::CircleShape body_shape(1.0f, 200);
+  body_shape.setFillColor(sf::Color::White);
 
   // create the window
   sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Orbits");
+  window.setVerticalSyncEnabled(true);
 
   sf::Clock delta_clock;
-  float dt;
+  float dt = 1.0/60.0;
+
+  CollisionResolver collision_res(bodies.size());
 
   while (window.isOpen()) {
     sf::Event event;
@@ -38,35 +40,44 @@ int main() {
       if (event.type == sf::Event::Closed) {
         window.close();
       }
-      
+
     }
 
-    // Update gravity
+    // Update gravity & collisions context
     Vector2f grav;
-    for (uint32_t i = 0; i < bodies.size()-1; ++i) {
-      for (uint32_t j = i+1; j < bodies.size(); ++j) {
-        grav = bodies[i].force_with(bodies[j]);
-        bodies[i].apply_force(grav);
+    float dist;
+    for (size_t i = 0; i < bodies.size()-1; ++i) {
+      for (size_t j = i+1; j < bodies.size(); ++j) {
+        grav = bodies[i].force_with(bodies[j], dist);
+        // bodies[i].apply_force(grav);
         // Equal and opposite force
-        bodies[j].apply_force(-grav);
+        // bodies[j].apply_force(-grav);
+
+        // collision_res.process_pair(i, j, bodies[i], bodies[j], dist);
       }
     }
 
+    // Apply collisions
+    // collision_res.apply_collisions(bodies);
+
     // Euler step
     for (auto& body : bodies) {
+      std::cout << "FPS:\t" << 1.0/dt << std::endl;
       body.step(dt);
     }
 
     // Draw
     window.clear(sf::Color::Black);
 
+    std::cout << bodies.size() << std::endl;
     for (const auto& body : bodies) {
-      window.draw(body_shape, body.get_transform());
+      body.draw(window, body_shape);
     }
 
     // end the current frame
     window.display();
 
+    collision_res.clear();
     sf::Time dt_time = delta_clock.restart();
     dt = dt_time.asSeconds();
   }
