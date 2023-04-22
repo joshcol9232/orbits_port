@@ -3,15 +3,15 @@
 #include <cmath>
 #include <Eigen/Dense>
 
+#include "common.h"
+
 #ifdef DEBUG
 #include <iostream>
 #endif
 
-using Eigen::Vector2f;
+#define WALL_BOUNCE
 
-#define G 0.01
-#define PLANET_DENSITY 1000.0
-#define COLLISION_DAMPING 0.9
+using Eigen::Vector2f;
 
 // Utility functions
 namespace {
@@ -23,7 +23,6 @@ namespace {
     return (4.0/3.0) * M_PI * radius * radius * radius;
   }
 }  // namespace
-
 
 Body::Body(Vector2f pos, Vector2f velocity, float radius) :
   Body(pos, velocity, radius, volume_of_sphere(radius) * PLANET_DENSITY)
@@ -38,6 +37,27 @@ void Body::step(const float dt) {
   // F = ma
   v_ += force_ * dt/mass_;
   x_ += v_ * dt;
+
+  // Wall bouncing
+#ifdef WALL_BOUNCE
+  if (x_.x() < radius_) {
+    v_.x() *= -1;
+    x_.x() = radius_;
+  }
+  if (x_.x() > SCREEN_WIDTH - radius_) {
+    v_.x() *= -1;
+    x_.x() = SCREEN_WIDTH - radius_;
+  }
+
+  if (x_.y() < radius_) {
+    v_.y() *= -1;
+    x_.y() = radius_;
+  }
+  if (x_.y() > SCREEN_HEIGHT - radius_) {
+    v_.y() *= -1;
+    x_.y() = SCREEN_HEIGHT - radius_;
+  }
+#endif
 
   // Reset resultant force
   force_.x() = 0.0;

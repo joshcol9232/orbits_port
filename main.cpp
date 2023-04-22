@@ -28,16 +28,22 @@ void spawn_square_of_planets(
   }
 }
 
-void spawn_random_planets(std::vector<Body>& bodies, const size_t num, const float rad) {
+void spawn_random_planets(std::vector<Body>& bodies,
+                          const Vector2f top_left,
+                          const Vector2f size,
+                          const size_t num,
+                          const float rad) {
   for (size_t n = 0; n < num; ++n) {
     Vector2f pos = Vector2f::Random();
-    pos.x() = (pos.x() + 1.0) * static_cast<float>(SCREEN_WIDTH)/2.0;
-    pos.y() = (pos.y() + 1.0) * static_cast<float>(SCREEN_HEIGHT)/2.0;
+    pos.x() = top_left.x() + (pos.x() + 1.0) * size.x()/2.0;
+    pos.y() = top_left.y() + (pos.y() + 1.0) * size.y()/2.0;
     bodies.emplace_back(pos, Vector2f::Zero(), rad);
   }
 }
 
 int main() {
+  srand((unsigned int) time(0));
+
   std::vector<Body> bodies;
   // bodies.emplace_back(Vector2f(100.0, 200.0),
   //                     Vector2f(100.0, 100.0),
@@ -49,22 +55,29 @@ int main() {
   //                     Vector2f(-100.0, 0.0),
   //                     10.0);
 
-  spawn_square_of_planets(bodies, Vector2f(100.0, 100.0),
-                          10, 10, 50.0, 10.0);
+  // spawn_square_of_planets(bodies, Vector2f(SCREEN_HEIGHT/2.0 + 100.0, SCREEN_HEIGHT/2.0 - 100.0),
+  //                         10, 20, 25.0, 5.0);
+  // bodies.emplace_back(Vector2f(200.0, 200.0),
+  //                     Vector2f(0.0, 0.0),
+  //                     50.0);
+  // bodies.emplace_back(Vector2f(10000.0, SCREEN_HEIGHT/2.0),
+  //                     Vector2f(-2000.0, 0.0),
+  //                     20.0);
 
-  // spawn_random_planets(bodies, 10, 50.0);
+
+  spawn_random_planets(bodies, Vector2f(200.0, 200.0), Vector2f(500.0, 500.0), 1000, 5.0);
 
   // TEST: THREE BODIES INTERSECTING
-  // bodies.emplace_back(Vector2f(static_cast<float>(SCREEN_WIDTH)/2.0 - 30.0,
-  //                              static_cast<float>(SCREEN_HEIGHT)/2.0),
+  // bodies.emplace_back(Vector2f(SCREEN_WIDTH/2.0 - 30.0,
+  //                              SCREEN_HEIGHT/2.0),
   //                     Vector2f::Zero(),
   //                     100.0);
-  // bodies.emplace_back(Vector2f(static_cast<float>(SCREEN_WIDTH)/2.0 + 30.0,
-  //                              static_cast<float>(SCREEN_HEIGHT)/2.0),
+  // bodies.emplace_back(Vector2f(SCREEN_WIDTH/2.0 + 30.0,
+  //                              SCREEN_HEIGHT/2.0),
   //                     Vector2f::Zero(),
   //                     100.0);
-  // bodies.emplace_back(Vector2f(static_cast<float>(SCREEN_WIDTH)/2.0,
-  //                              static_cast<float>(SCREEN_HEIGHT)/2.0 - 30.0),
+  // bodies.emplace_back(Vector2f(SCREEN_WIDTH/2.0,
+  //                              SCREEN_HEIGHT/2.0 - 30.0),
   //                     Vector2f::Zero(),
   //                     100.0);
 
@@ -77,13 +90,17 @@ int main() {
   sf::Text fps_text;
   fps_text.setFont(font);
   fps_text.setString("0");
-  fps_text.setPosition(static_cast<float>(SCREEN_WIDTH) - 60.0, 10.0);
+  fps_text.setPosition(SCREEN_WIDTH - 60.0, 10.0);
   fps_text.setFillColor(sf::Color::Green);
   fps_text.setCharacterSize(12);
 
 
+  std::cout << "BODY NUM: " << bodies.size() << std::endl;
+
   // create the window
-  sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Orbits");
+  sf::RenderWindow window(sf::VideoMode(static_cast<int>(SCREEN_WIDTH),
+                                        static_cast<int>(SCREEN_HEIGHT)),
+                          "Orbits");
   // window.setVerticalSyncEnabled(true);
 
   sf::Clock delta_clock;
@@ -113,7 +130,7 @@ int main() {
 
         // Process collisions
         const float radius_sum = a.get_radius() + b.get_radius();
-        if (dist < radius_sum) { a.elastic_collide_with(b, dist); }
+        if (dist < radius_sum) { a.elastic_collide_with(b, dist); }        
       }
     }
 
