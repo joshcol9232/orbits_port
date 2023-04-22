@@ -9,8 +9,7 @@ find_package (Eigen3 3.4 REQUIRED NO_MODULE)
 find_package (SFML REQUIRED system window graphics network audio)
 
 add_executable(orbits_port main.cpp
-               Body.h Body.cpp
-               CollisionResolver.h CollisionResolver.cpp)
+               Body.h Body.cpp)
 
 target_link_libraries (orbits_port PRIVATE sfml-audio sfml-graphics sfml-network sfml-system Eigen3::Eigen)
 

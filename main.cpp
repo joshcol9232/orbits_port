@@ -6,7 +6,6 @@
 
 #include "common.h"
 #include "Body.h"
-#include "CollisionResolver.h"
 
 using Eigen::Vector2f;
 
@@ -29,6 +28,15 @@ void spawn_square_of_planets(
   }
 }
 
+void spawn_random_planets(std::vector<Body>& bodies, const size_t num, const float rad) {
+  for (size_t n = 0; n < num; ++n) {
+    Vector2f pos = Vector2f::Random();
+    pos.x() = (pos.x() + 1.0) * static_cast<float>(SCREEN_WIDTH)/2.0;
+    pos.y() = (pos.y() + 1.0) * static_cast<float>(SCREEN_HEIGHT)/2.0;
+    bodies.emplace_back(pos, Vector2f::Zero(), rad);
+  }
+}
+
 int main() {
   std::vector<Body> bodies;
   // bodies.emplace_back(Vector2f(100.0, 200.0),
@@ -37,9 +45,28 @@ int main() {
   // bodies.emplace_back(Vector2f(100.1, 600.0),
   //                     Vector2f(100.0, -100.0),
   //                     10.0);
+  // bodies.emplace_back(Vector2f(500.0, 400.0),
+  //                     Vector2f(-100.0, 0.0),
+  //                     10.0);
 
-  spawn_square_of_planets(bodies, Vector2f(100.0, 100.0),
-                          3, 3, 50.0, 10.0);
+  // spawn_square_of_planets(bodies, Vector2f(100.0, 100.0),
+  //                         3, 3, 50.0, 10.0);
+
+  spawn_random_planets(bodies, 10, 50.0);
+
+  // THREE BODIES INTERSECTING
+  // bodies.emplace_back(Vector2f(static_cast<float>(SCREEN_WIDTH)/2.0 - 30.0,
+  //                              static_cast<float>(SCREEN_HEIGHT)/2.0),
+  //                     Vector2f::Zero(),
+  //                     100.0);
+  // bodies.emplace_back(Vector2f(static_cast<float>(SCREEN_WIDTH)/2.0 + 30.0,
+  //                              static_cast<float>(SCREEN_HEIGHT)/2.0),
+  //                     Vector2f::Zero(),
+  //                     100.0);
+  // bodies.emplace_back(Vector2f(static_cast<float>(SCREEN_WIDTH)/2.0,
+  //                              static_cast<float>(SCREEN_HEIGHT)/2.0 - 30.0),
+  //                     Vector2f::Zero(),
+  //                     100.0);
 
   // Create assets
   sf::CircleShape body_shape(1.0f, 200);
@@ -52,8 +79,6 @@ int main() {
   sf::Clock delta_clock;
   float dt = 1.0/60.0;
 
-  CollisionResolver collision_res;
-
   while (window.isOpen()) {
     sf::Event event;
     while (window.pollEvent(event)) {
@@ -65,19 +90,22 @@ int main() {
     // Update gravity & collisions context
     Vector2f grav;
     float dist;
-    for (size_t i = 0; i < bodies.size()-1; ++i) {
-      for (size_t j = i+1; j < bodies.size(); ++j) {
-        grav = bodies[i].force_with(bodies[j], dist);
-        bodies[i].apply_force(grav);
-        // Equal and opposite force
-        bodies[j].apply_force(-grav);
 
-        collision_res.process_pair(i, j, bodies[i], bodies[j], dist);
+    for (size_t i = 0; i < bodies.size()-1; ++i) {
+      Body& a = bodies[i];
+      for (size_t j = i+1; j < bodies.size(); ++j) {
+        Body& b = bodies[j];
+
+        grav = a.force_with(b, dist);
+        a.apply_force(grav);
+        // Equal and opposite force
+        b.apply_force(-grav);
+
+        // Process collisions
+        const float radius_sum = a.get_radius() + b.get_radius();
+        if (dist < radius_sum) { a.elastic_collide_with(b, dist); }
       }
     }
-
-    // Apply collisions
-    // bodies = collision_res.apply_collisions(bodies);
 
     // Euler step
     for (auto& body : bodies) {
