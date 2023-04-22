@@ -31,15 +31,15 @@ void spawn_square_of_planets(
 
 int main() {
   std::vector<Body> bodies;
-  bodies.emplace_back(Vector2f(100.0, 250.0),
-                      Vector2f(10.0, 0.0),
-                      10.0);
-  bodies.emplace_back(Vector2f(100.1, 300.0),
-                      Vector2f(10.0, 0.0),
-                      10.0);
+  // bodies.emplace_back(Vector2f(100.0, 200.0),
+  //                     Vector2f(100.0, 100.0),
+  //                     10.0);
+  // bodies.emplace_back(Vector2f(100.1, 600.0),
+  //                     Vector2f(100.0, -100.0),
+  //                     10.0);
 
-  // spawn_square_of_planets(bodies, Vector2f(100.0, 100.0),
-  //                         10, 10, 200.0, 10.0);
+  spawn_square_of_planets(bodies, Vector2f(100.0, 100.0),
+                          3, 3, 50.0, 10.0);
 
   // Create assets
   sf::CircleShape body_shape(1.0f, 200);
@@ -52,7 +52,7 @@ int main() {
   sf::Clock delta_clock;
   float dt = 1.0/60.0;
 
-  CollisionResolver collision_res(bodies.size());
+  CollisionResolver collision_res;
 
   while (window.isOpen()) {
     sf::Event event;
@@ -77,7 +77,7 @@ int main() {
     }
 
     // Apply collisions
-    bodies = collision_res.apply_collisions(bodies);
+    // bodies = collision_res.apply_collisions(bodies);
 
     // Euler step
     for (auto& body : bodies) {
@@ -94,7 +94,6 @@ int main() {
     // end the current frame
     window.display();
 
-    collision_res.clear();
     sf::Time dt_time = delta_clock.restart();
     dt = dt_time.asSeconds();
   }

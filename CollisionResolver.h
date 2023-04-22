@@ -9,18 +9,13 @@
 
 class CollisionResolver {
 public:
-  CollisionResolver(size_t bodies_size) :
-    marked_(bodies_size, false), pairs_colliding_{} 
-  {}
+  //CollisionResolver(size_t bodies_size) :
+    // marked_(bodies_size, false), pairs_colliding_{} 
+  //{}
+  CollisionResolver() {}
 
   void process_pair(const size_t idx_a, const size_t idx_b,
-                    const Body& a, const Body& b, const float distance);
-  std::vector<Body> apply_collisions(std::vector<Body> bodies);
-
-  void clear();
+                    Body& a, Body& b, const float distance) const;
 
 private:
-  std::vector<std::array<size_t, 2>> pairs_colliding_;
-  // Bodies marked as colliding
-  std::vector<bool> marked_;
 };

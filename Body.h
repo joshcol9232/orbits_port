@@ -17,12 +17,13 @@ public:
   void apply_force(const Vector2f& force);
   Vector2f displacement_between(const Body& other) const;
   Vector2f force_with(const Body& other, float& distance) const;
-  void inelastic_collide_with(const Body& other);  // NOTE: Consumes other body
+  void elastic_collide_with(Body& other);  // NOTE: Consumes other body
 
   void get_transform(sf::Transform& tr) const;
   float get_radius() const { return radius_; }
 
-// private:
+private:
   Vector2f x_, v_, force_;
   float mass_, radius_;
+  bool is_already_colliding_;   // Reset every frame. Used to prevent same collision resolving twice
 };

@@ -2,6 +2,9 @@
 #include <cmath>
 #include <iostream>
 
+#include <Eigen/Dense>
+using Eigen::Vector2f;
+
 #define G 0.01
 #define PLANET_DENSITY 1000.0
 
@@ -23,7 +26,8 @@ Body::Body(Vector2f pos, Vector2f velocity, float radius) :
 
 Body::Body(Vector2f pos, Vector2f velocity,
            float radius, float mass) :
-  x_(pos), v_(velocity), mass_(mass), radius_(radius), force_(0.0, 0.0)
+  x_(pos), v_(velocity), mass_(mass), radius_(radius), force_(0.0, 0.0),
+  is_already_colliding_(false)
 {}
 
 void Body::step(const float dt) {
@@ -34,6 +38,8 @@ void Body::step(const float dt) {
   // Reset resultant force
   force_.x() = 0.0;
   force_.y() = 0.0;
+  // Reset collision status
+  is_already_colliding_ = false;
 }
 
 void Body::draw(sf::RenderWindow& window, sf::CircleShape& circle_mesh) const {
@@ -49,7 +55,7 @@ Vector2f Body::displacement_between(const Body& other) const {
   return other.x_ - x_;
 }
 
-// NOTE: Distance written to here for use in collisions
+// NOTE: Distance is written to here for use in collisions
 Vector2f Body::force_with(const Body& other, float& distance) const {
   // Get dist vec
   Vector2f force = displacement_between(other);
@@ -58,16 +64,26 @@ Vector2f Body::force_with(const Body& other, float& distance) const {
   return force;
 }
 
-void Body::inelastic_collide_with(const Body& other) {
-  // Conservation of momentum
-  const float total_mass = mass_ + other.mass_;
-  const Vector2f total_momentum = mass_ * v_ + other.mass_ * other.v_;
-  radius_ = radius_of_sphere(total_mass/PLANET_DENSITY);
-  // Use centre of mass as new position
-  x_.x() = (x_.x() * mass_ + other.x_.x() * other.mass_)/total_mass;
-  x_.y() = (x_.y() * mass_ + other.x_.y() * other.mass_)/total_mass;
-  std::cout << "New position: " << x_.x() << ", " << x_.y() << std::endl;
+void Body::elastic_collide_with(Body& other) {
+  if (is_already_colliding_ || other.is_already_colliding_) return;
 
-  v_ = total_momentum/total_mass;   // Inelastic collision
-  mass_ = total_mass;
+  is_already_colliding_ = true;
+  other.is_already_colliding_ = true;
+  
+  const float total_mass = mass_ + other.mass_;
+  const Vector2f dist_vec = other.x_ - x_;
+  const float vel_along_collision_normal = (other.v_ - v_).dot(dist_vec);
+  const float dist_sqr = dist_vec.squaredNorm();
+
+  const Vector2f dv_0 = - (2 * other.mass_ / total_mass) *
+                          (vel_along_collision_normal / dist_sqr) * -dist_vec;
+
+  const Vector2f dv_1 = - (2 * mass_ / total_mass) *
+                          (vel_along_collision_normal / dist_sqr) * dist_vec;
+
+  std::cout << "dv_0: (" << dv_0.x() << ", " << dv_0.y() << ")" << std::endl;
+  std::cout << "dv_1: (" << dv_1.x() << ", " << dv_1.y() << ")" << std::endl;
+
+  v_ += dv_0;
+  other.v_ += dv_1;
 }
