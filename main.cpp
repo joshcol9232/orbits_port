@@ -10,16 +10,36 @@
 
 using Eigen::Vector2f;
 
-
+// Utils
+void spawn_square_of_planets(
+  std::vector<Body>& bodies,
+  Vector2f top_left,
+  const size_t w,
+  const size_t h,
+  const float gap,
+  const float rad
+) {
+  for (size_t i = 0; i < w; ++i) {
+    for (size_t j = 0; j < h; ++j) {
+      bodies.emplace_back(Vector2f(top_left.x() + static_cast<float>(i) * gap,
+                                   top_left.y() + static_cast<float>(j) * gap),
+                          Vector2f(0.0, 0.0),
+                          rad);
+    }
+  }
+}
 
 int main() {
   std::vector<Body> bodies;
-  bodies.emplace_back(Vector2f(100.0, 100.0),
+  bodies.emplace_back(Vector2f(100.0, 250.0),
                       Vector2f(10.0, 0.0),
                       10.0);
-  bodies.emplace_back(Vector2f(100.1, 200.0),
+  bodies.emplace_back(Vector2f(100.1, 300.0),
                       Vector2f(10.0, 0.0),
                       10.0);
+
+  // spawn_square_of_planets(bodies, Vector2f(100.0, 100.0),
+  //                         10, 10, 200.0, 10.0);
 
   // Create assets
   sf::CircleShape body_shape(1.0f, 200);
@@ -40,7 +60,6 @@ int main() {
       if (event.type == sf::Event::Closed) {
         window.close();
       }
-
     }
 
     // Update gravity & collisions context
@@ -58,7 +77,7 @@ int main() {
     }
 
     // Apply collisions
-    collision_res.apply_collisions(bodies);
+    bodies = collision_res.apply_collisions(bodies);
 
     // Euler step
     for (auto& body : bodies) {

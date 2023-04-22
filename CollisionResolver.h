@@ -15,7 +15,7 @@ public:
 
   void process_pair(const size_t idx_a, const size_t idx_b,
                     const Body& a, const Body& b, const float distance);
-  void apply_collisions(std::vector<Body>& bodies);
+  std::vector<Body> apply_collisions(std::vector<Body> bodies);
 
   void clear();
 
