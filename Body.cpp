@@ -11,7 +11,7 @@ using Eigen::Vector2f;
 
 #define G 0.01
 #define PLANET_DENSITY 1000.0
-#define DAMPING 0.9
+#define COLLISION_DAMPING 0.9
 
 // Utility functions
 namespace {
@@ -56,14 +56,10 @@ void Body::draw(sf::RenderWindow& window, sf::CircleShape& circle_mesh) const {
 
 void Body::apply_force(const Vector2f& df) { force_ += df; }
 
-Vector2f Body::displacement_between(const Body& other) const {
-  return other.x_ - x_;
-}
-
 // NOTE: Distance is written to here for use in collisions
 Vector2f Body::force_with(const Body& other, float& distance) const {
   // Get dist vec
-  Vector2f force = displacement_between(other);
+  Vector2f force = other.x_ - x_;
   distance = force.norm();
   force *= G * mass_ * other.mass_ / (distance*distance*distance);
   return force;
@@ -88,8 +84,8 @@ void Body::elastic_collide_with(Body& other, const float distance) {
   std::cout << "dv_1: (" << dv_1.x() << ", " << dv_1.y() << ")" << std::endl;
 #endif
 
-  v_ += dv_0 * DAMPING;
-  other.v_ += dv_1 * DAMPING;
+  v_ += dv_0 * COLLISION_DAMPING;
+  other.v_ += dv_1 * COLLISION_DAMPING;
 
   // ---
   // Move the bodies apart so they are not overlapping (this would cause issues)

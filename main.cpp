@@ -42,19 +42,19 @@ int main() {
   // bodies.emplace_back(Vector2f(100.0, 200.0),
   //                     Vector2f(100.0, 100.0),
   //                     10.0);
-  // bodies.emplace_back(Vector2f(100.1, 600.0),
+  // bodies.emplace_back(Vector2f(100.0, 600.0),
   //                     Vector2f(100.0, -100.0),
   //                     10.0);
   // bodies.emplace_back(Vector2f(500.0, 400.0),
   //                     Vector2f(-100.0, 0.0),
   //                     10.0);
 
-  // spawn_square_of_planets(bodies, Vector2f(100.0, 100.0),
-  //                         3, 3, 50.0, 10.0);
+  spawn_square_of_planets(bodies, Vector2f(100.0, 100.0),
+                          10, 10, 50.0, 10.0);
 
-  spawn_random_planets(bodies, 10, 50.0);
+  // spawn_random_planets(bodies, 10, 50.0);
 
-  // THREE BODIES INTERSECTING
+  // TEST: THREE BODIES INTERSECTING
   // bodies.emplace_back(Vector2f(static_cast<float>(SCREEN_WIDTH)/2.0 - 30.0,
   //                              static_cast<float>(SCREEN_HEIGHT)/2.0),
   //                     Vector2f::Zero(),
@@ -72,9 +72,19 @@ int main() {
   sf::CircleShape body_shape(1.0f, 200);
   body_shape.setFillColor(sf::Color::White);
 
+  sf::Font font;
+  font.loadFromFile("./Hack-Bold.ttf");
+  sf::Text fps_text;
+  fps_text.setFont(font);
+  fps_text.setString("0");
+  fps_text.setPosition(static_cast<float>(SCREEN_WIDTH) - 60.0, 10.0);
+  fps_text.setFillColor(sf::Color::Green);
+  fps_text.setCharacterSize(12);
+
+
   // create the window
   sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Orbits");
-  window.setVerticalSyncEnabled(true);
+  // window.setVerticalSyncEnabled(true);
 
   sf::Clock delta_clock;
   float dt = 1.0/60.0;
@@ -118,6 +128,10 @@ int main() {
     for (const auto& body : bodies) {
       body.draw(window, body_shape);
     }
+
+    // Draw FPS counter
+    fps_text.setString(std::to_string(1.0/dt));
+    window.draw(fps_text);
 
     // end the current frame
     window.display();

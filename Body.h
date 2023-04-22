@@ -15,7 +15,6 @@ public:
 
   void step(const float dt);
   void apply_force(const Vector2f& force);
-  Vector2f displacement_between(const Body& other) const;
   Vector2f force_with(const Body& other, float& distance) const;
   void elastic_collide_with(Body& other, const float distance);  // NOTE: Consumes other body
 
