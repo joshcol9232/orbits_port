@@ -109,10 +109,10 @@ void start_state(std::vector<Body>& bodies) {
   //                     Vector2f::Zero(),
   //                     100.0);
 
-  const float orbit_range[2] = {15.0, 200.0};
-  const float rad_range[2] = {0.5, 1.5};
+  const float orbit_range[2] = {30.0, 150.0};
+  const float rad_range[2] = {1.0, 1.5};
   spawn_planet_with_moons(bodies, Vector2f(SCREEN_WIDTH/2, SCREEN_HEIGHT/2),
-                          Vector2f::Zero(), 50.0, 100, orbit_range,
+                          Vector2f::Zero(), 50.0, 1000, orbit_range,
                           rad_range, true);
 }
 
@@ -168,16 +168,18 @@ int main() {
 
         // Spawn planet with velocity
         const auto drag = mouse_start_pos - curr_mouse_press_pos;
-        constexpr float RAD = 10.0;
         bodies.emplace_back(Vector2f(mouse_start_pos.x, mouse_start_pos.y),
                             Vector2f(drag.x, drag.y),
-                            RAD,
-                            tools::volume_of_sphere(RAD) * PLANET_DENSITY * 10.0);
+                            10.0);
       }
       // -------------
       // --- Keyboard ---
-      if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::R) {
-        start_state(bodies);
+      if (event.type == sf::Event::KeyPressed) {
+        if(event.key.code == sf::Keyboard::R) {
+          start_state(bodies);
+        } else if (event.key.code == sf::Keyboard::C) {
+          bodies.clear();
+        }
       }
 
       // ----------------
@@ -193,33 +195,30 @@ int main() {
     }
 
     // Update physics
-    float dt_phys = dt / static_cast<float>(SUBSTEPS);
-    for (size_t phys_step = 0; phys_step < SUBSTEPS; ++phys_step) {
-      Vector2f grav;
-      float dist;
+    Vector2f grav;
+    float dist;
 
-      for (size_t i = 0; i < bodies.size()-1; ++i) {
-        Body& a = bodies[i];
-        for (size_t j = i+1; j < bodies.size(); ++j) {
-          Body& b = bodies[j];
+    for (size_t i = 0; i < bodies.size()-1; ++i) {
+      Body& a = bodies[i];
+      for (size_t j = i+1; j < bodies.size(); ++j) {
+        Body& b = bodies[j];
 
-          grav = a.force_with(b, dist);
-          a.apply_force(grav);
-          // Equal and opposite force
-          b.apply_force(-grav);
+        grav = a.force_with(b, dist);
+        a.apply_force(grav);
+        // Equal and opposite force
+        b.apply_force(-grav);
 
-          // Process collisions
-          const float radius_sum = a.get_radius() + b.get_radius();
-          if (dist < radius_sum) {
-            a.elastic_collide_with(b, dist);
-          }
+        // Process collisions
+        const float radius_sum = a.get_radius() + b.get_radius();
+        if (dist < radius_sum) {
+          a.elastic_collide_with(b, dist);
         }
       }
+    }
 
-      // Euler step
-      for (auto& body : bodies) {
-        body.step(dt_phys);
-      }
+    // Euler step
+    for (auto& body : bodies) {
+      body.step(dt);
     }
 
     // Draw

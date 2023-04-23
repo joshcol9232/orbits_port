@@ -10,7 +10,7 @@
 #include <iostream>
 #endif
 
-// #define WALL_BOUNCE
+#define WALL_BOUNCE
 
 using Eigen::Vector2f;
 
