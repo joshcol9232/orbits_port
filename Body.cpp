@@ -4,28 +4,18 @@
 #include <Eigen/Dense>
 
 #include "common.h"
+#include "tools.h"
 
 #ifdef DEBUG
 #include <iostream>
 #endif
 
-#define WALL_BOUNCE
+// #define WALL_BOUNCE
 
 using Eigen::Vector2f;
 
-// Utility functions
-namespace {
-  float radius_of_sphere(const double volume) {
-    return std::pow((3.0 * volume)/(4.0 * M_PI), 1.0/3.0);
-  }
-
-  float volume_of_sphere(const double radius) {
-    return (4.0/3.0) * M_PI * radius * radius * radius;
-  }
-}  // namespace
-
 Body::Body(Vector2f pos, Vector2f velocity, float radius) :
-  Body(pos, velocity, radius, volume_of_sphere(radius) * PLANET_DENSITY)
+  Body(pos, velocity, radius, tools::volume_of_sphere(radius) * PLANET_DENSITY)
 {}
 
 Body::Body(Vector2f pos, Vector2f velocity,
@@ -76,6 +66,10 @@ void Body::draw(sf::RenderWindow& window, sf::CircleShape& circle_mesh) const {
 
 void Body::apply_force(const Vector2f& df) { force_ += df; }
 
+Vector2f Body::displacement_to(const Body& other) const {
+  return other.x_ - x_;
+}
+
 // NOTE: Distance is written to here for use in collisions
 Vector2f Body::force_with(const Body& other, float& distance) const {
   // Get dist vec
@@ -86,12 +80,14 @@ Vector2f Body::force_with(const Body& other, float& distance) const {
 }
 
 void Body::elastic_collide_with(Body& other, const float distance) {
+  correct_overlap_with(other, distance);
+
   // --- Resolve collision ---
   const Vector2f dist_vec = other.x_ - x_;
   const float total_mass = mass_ + other.mass_;
 
   const float vel_along_collision_normal = (other.v_ - v_).dot(dist_vec);
-  const float dist_sqr = distance * distance;
+  const float dist_sqr = std::pow(radius_ + other.radius_, 2); // distance * distance;
 
   const Vector2f dv_0 = - (2 * other.mass_ / total_mass) *
                           (vel_along_collision_normal / dist_sqr) * -dist_vec;
@@ -106,12 +102,18 @@ void Body::elastic_collide_with(Body& other, const float distance) {
 
   v_ += dv_0 * COLLISION_DAMPING;
   other.v_ += dv_1 * COLLISION_DAMPING;
+}
 
-  // ---
+void Body::correct_overlap_with(Body& other, const float distance) {
   // Move the bodies apart so they are not overlapping (this would cause issues)
-  const Vector2f norm = dist_vec / distance;  // Normal to collision
+  // NOTE: TODO - Maybe this is causing the spinning - not conserving angular momentum.
+  //       Should instead shift the planet's along their trajectory?
+  //        
+
+  const Vector2f norm = (other.x_ - x_) / distance;  // Normal to collision
+  const float overlap = distance - radius_ - other.radius_;
   // Amount of overlap:
-  const Vector2f half_dx = 0.5 * (distance - radius_ - other.radius_) * norm;
+  const Vector2f half_dx = 0.5 * overlap * norm;
   // Each needs to be shifted by 1/2 dx r_hat
   x_ += half_dx;
   other.x_ -= half_dx;

@@ -16,10 +16,12 @@ public:
   void step(const float dt);
   void apply_force(const Vector2f& force);
   Vector2f force_with(const Body& other, float& distance) const;
-  void elastic_collide_with(Body& other, const float distance);  // NOTE: Consumes other body
+  void elastic_collide_with(Body& other, const float distance);
+  void correct_overlap_with(Body& other, const float distance);
 
-  void get_transform(sf::Transform& tr) const;
   float get_radius() const { return radius_; }
+  float get_mass() const { return mass_; }
+  Vector2f displacement_to(const Body& other) const;
 
 private:
   Vector2f x_, v_, force_;
