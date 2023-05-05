@@ -12,18 +12,19 @@
 using Eigen::Vector2f;
 
 // Utils
+namespace {
+
 void spawn_square_of_planets(
   std::vector<Body>& bodies,
   Vector2f top_left,
   const size_t w,
   const size_t h,
-  const float gap,
   const float rad
 ) {
   for (size_t i = 0; i < w; ++i) {
     for (size_t j = 0; j < h; ++j) {
-      bodies.emplace_back(Vector2f(top_left.x() + static_cast<float>(i) * gap,
-                                   top_left.y() + static_cast<float>(j) * gap),
+      bodies.emplace_back(Vector2f(top_left.x() + static_cast<float>(i) * rad * 2,
+                                   top_left.y() + static_cast<float>(j) * rad * 2),
                           Vector2f(0.0, 0.0),
                           rad);
     }
@@ -89,8 +90,8 @@ void spawn_planet_with_moons(
 void start_state(std::vector<Body>& bodies) {
   bodies.clear();
 
-  // spawn_square_of_planets(bodies, Vector2f(200.0, 100.0),
-  //                         25, 25, 20.0, 2.0);
+  // spawn_square_of_planets(bodies, Vector2f(600.0, 800.0),
+  //                         15, 15, 5.0);
 
   // spawn_random_planets(bodies, Vector2f(400.0, 400.0),
   //                      Vector2f(100.0, 100.0), 400, 1.0);
@@ -109,13 +110,19 @@ void start_state(std::vector<Body>& bodies) {
   //                     Vector2f::Zero(),
   //                     100.0);
 
-  const float orbit_range[2] = {30.0, 150.0};
-  const float rad_range[2] = {1.0, 1.5};
+  const float orbit_range[2] = {300.0, 400.0};
+  const float rad_range[2] = {1.0, 7.0};
   spawn_planet_with_moons(bodies, Vector2f(SCREEN_WIDTH/2, SCREEN_HEIGHT/2),
-                          Vector2f::Zero(), 50.0, 1000, orbit_range,
+                          Vector2f::Zero(), 100.0, 100, orbit_range,
                           rad_range, true);
 }
 
+void move_camera(auto& window, auto& main_camera, const float dx, const float dy, const float dt) {
+  main_camera.move(dx * dt, dy * dt);
+  window.setView(main_camera);
+}
+
+}  // namespace
 
 int main() {
   srand((unsigned int) time(0));
@@ -141,12 +148,16 @@ int main() {
   sf::Vector2i mouse_start_pos, curr_mouse_press_pos;
   sf::Vertex drag_line[2];
 
+  // Camera
+  bool cam_move_up, cam_move_down, cam_move_left, cam_move_right;
+
   std::cout << "BODY NUM: " << bodies.size() << std::endl;
 
   // create the window
   sf::RenderWindow window(sf::VideoMode(static_cast<int>(SCREEN_WIDTH),
                                         static_cast<int>(SCREEN_HEIGHT)),
                           "Orbits");
+  sf::View main_camera(sf::FloatRect(0.f, 0.f, SCREEN_WIDTH, SCREEN_HEIGHT));
 
   sf::Clock delta_clock;
   float dt = 1.0/60.0;
@@ -167,10 +178,11 @@ int main() {
         dragging = false;
 
         // Spawn planet with velocity
+        constexpr float mouse_rad = 10.0;
         const auto drag = mouse_start_pos - curr_mouse_press_pos;
         bodies.emplace_back(Vector2f(mouse_start_pos.x, mouse_start_pos.y),
-                            Vector2f(drag.x, drag.y),
-                            10.0);
+                            Vector2f(drag.x, drag.y) * 5.0,
+                            mouse_rad, tools::volume_of_sphere(mouse_rad) * PLANET_DENSITY * 10.0);
       }
       // -------------
       // --- Keyboard ---
@@ -180,6 +192,24 @@ int main() {
         } else if (event.key.code == sf::Keyboard::C) {
           bodies.clear();
         }
+        // --- CAMERA ---
+        cam_move_up    = event.key.code == sf::Keyboard::W;
+        cam_move_left  = event.key.code == sf::Keyboard::A;
+        cam_move_down  = event.key.code == sf::Keyboard::S;
+        cam_move_right = event.key.code == sf::Keyboard::D;
+        // --------------
+      } else if (event.type == sf::Event::KeyReleased) {
+        // --- CAMERA ---
+        if (event.key.code == sf::Keyboard::W) {
+          cam_move_up = false;
+        } else if (event.key.code == sf::Keyboard::A) {
+          cam_move_left = false;
+        } else if (event.key.code == sf::Keyboard::S) {
+          cam_move_down = false;
+        } else if (event.key.code == sf::Keyboard::D) {
+          cam_move_right = false;
+        }
+        // --------------
       }
 
       // ----------------
@@ -193,6 +223,12 @@ int main() {
       drag_line[0].color = sf::Color::Green;
       drag_line[1].color = sf::Color::Green;
     }
+
+    // Camera
+    // if (cam_move_up)    move_camera(window, main_camera,    0.0, -600.0, dt);
+    // if (cam_move_down)  move_camera(window, main_camera,    0.0,  600.0, dt);
+    // if (cam_move_left)  move_camera(window, main_camera, -600.0,    0.0, dt);
+    // if (cam_move_right) move_camera(window, main_camera,  600.0,    0.0, dt);
 
     // Update physics
     Vector2f grav;
@@ -209,10 +245,7 @@ int main() {
         b.apply_force(-grav);
 
         // Process collisions
-        const float radius_sum = a.get_radius() + b.get_radius();
-        if (dist < radius_sum) {
-          a.elastic_collide_with(b, dist);
-        }
+        if (dist < a.get_radius() + b.get_radius()) { a.elastic_collide_with(b, dist); }
       }
     }
 
@@ -229,13 +262,15 @@ int main() {
     }
 
     // Draw mouse drag
-    if (dragging) {
-      window.draw(drag_line, 2, sf::Lines);
-    }
+    if (dragging) window.draw(drag_line, 2, sf::Lines);
 
+    // --- RENDER STATIC ITEMS LIKE FPS ---
+    window.setView(window.getDefaultView());
     // Draw FPS counter
     fps_text.setString(std::to_string(1.0/dt));
     window.draw(fps_text);
+    // ------------------------------------
+    window.setView(main_camera);
 
     // end the current frame
     window.display();

@@ -6,11 +6,10 @@
 #include "common.h"
 #include "tools.h"
 
-#ifdef DEBUG
 #include <iostream>
-#endif
 
-#define WALL_BOUNCE
+
+// #define WALL_BOUNCE
 
 using Eigen::Vector2f;
 
@@ -79,21 +78,39 @@ Vector2f Body::force_with(const Body& other, float& distance) const {
   return force;
 }
 
+namespace {
+
+// 2D "cross product" ie. determenant of packed matrix
+inline float cross2d(const Vector2f& a, const Vector2f& b) {
+  return a.x() * b.y() - b.x() * a.y();
+}
+
+}
+
 void Body::elastic_collide_with(Body& other, const float distance) {
   correct_overlap_with(other, distance);
 
   // --- Resolve collision ---
   const Vector2f dist_vec = other.x_ - x_;
+  const Vector2f v_diff = other.v_ - v_;
   const float total_mass = mass_ + other.mass_;
 
-  const float vel_along_collision_normal = (other.v_ - v_).dot(dist_vec);
+  // Work out tangent component for friction later
+  Vector2f tangent_normal = dist_vec / distance;
+  { // rotate 90 degrees
+    const float x_tmp = tangent_normal.x();
+    tangent_normal.x() = -tangent_normal.y();
+    tangent_normal.y() = x_tmp;
+  }
+
+  const float vel_mul_dist_along_collision_normal = v_diff.dot(dist_vec);
   const float dist_sqr = std::pow(radius_ + other.radius_, 2); // distance * distance;
 
   const Vector2f dv_0 = - (2 * other.mass_ / total_mass) *
-                          (vel_along_collision_normal / dist_sqr) * -dist_vec;
+                          (vel_mul_dist_along_collision_normal / dist_sqr) * -dist_vec;
 
   const Vector2f dv_1 = - (2 * mass_ / total_mass) *
-                          (vel_along_collision_normal / dist_sqr) * dist_vec;
+                          (vel_mul_dist_along_collision_normal / dist_sqr) * dist_vec;
 
 #ifdef DEBUG
   std::cout << "dv_0: (" << dv_0.x() << ", " << dv_0.y() << ")" << std::endl;
@@ -102,6 +119,13 @@ void Body::elastic_collide_with(Body& other, const float distance) {
 
   v_ += dv_0 * COLLISION_DAMPING;
   other.v_ += dv_1 * COLLISION_DAMPING;
+
+  // Apply tangential friction
+  const float vel_along_collision_tangent = v_diff.dot(tangent_normal);
+  const Vector2f dv_f_0 = vel_along_collision_tangent * -tangent_normal;
+
+
+  constexpr float friction_coeff = 1.0 - FRICTION;
 }
 
 void Body::correct_overlap_with(Body& other, const float distance) {
