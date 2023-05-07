@@ -16,7 +16,7 @@ public:
   void step(const float dt);
   void apply_force(const Vector2f& force);
   Vector2f force_with(const Body& other, float& distance) const;
-  void elastic_collide_with(Body& other, const float distance);
+  void elastic_collide_with(Body& other, const float distance, const float dt);
   void correct_overlap_with(Body& other, const float distance);
 
   float get_radius() const { return radius_; }

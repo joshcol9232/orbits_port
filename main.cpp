@@ -23,8 +23,8 @@ void spawn_square_of_planets(
 ) {
   for (size_t i = 0; i < w; ++i) {
     for (size_t j = 0; j < h; ++j) {
-      bodies.emplace_back(Vector2f(top_left.x() + static_cast<float>(i) * rad * 2,
-                                   top_left.y() + static_cast<float>(j) * rad * 2),
+      bodies.emplace_back(Vector2f(top_left.x() + static_cast<float>(i) * rad * 2.01,
+                                   top_left.y() + static_cast<float>(j) * rad * 2.01),
                           Vector2f(0.0, 0.0),
                           rad);
     }
@@ -91,7 +91,7 @@ void start_state(std::vector<Body>& bodies) {
   bodies.clear();
 
   // spawn_square_of_planets(bodies, Vector2f(600.0, 800.0),
-  //                         15, 15, 5.0);
+  //                         2, 2, 50.0);
 
   // spawn_random_planets(bodies, Vector2f(400.0, 400.0),
   //                      Vector2f(100.0, 100.0), 400, 1.0);
@@ -110,11 +110,18 @@ void start_state(std::vector<Body>& bodies) {
   //                     Vector2f::Zero(),
   //                     100.0);
 
-  const float orbit_range[2] = {300.0, 400.0};
-  const float rad_range[2] = {1.0, 7.0};
-  spawn_planet_with_moons(bodies, Vector2f(SCREEN_WIDTH/2, SCREEN_HEIGHT/2),
-                          Vector2f::Zero(), 100.0, 100, orbit_range,
-                          rad_range, true);
+  // const float orbit_range[2] = {300.0, 400.0};
+  // const float rad_range[2] = {1.0, 8.0};
+  // spawn_planet_with_moons(bodies, Vector2f(SCREEN_WIDTH/2, SCREEN_HEIGHT/2),
+  //                         Vector2f::Zero(), 100.0, 100, orbit_range,
+  //                         rad_range, true);
+
+  bodies.emplace_back(Vector2f(400.0, 400.0),
+                      Vector2f(0.0, 0.0),
+                      100.0);
+  // bodies.emplace_back(Vector2f(800.0, 400.0),
+  //                     Vector2f(0.0, -50.0),
+  //                     100.0);
 }
 
 void move_camera(auto& window, auto& main_camera, const float dx, const float dy, const float dt) {
@@ -225,10 +232,10 @@ int main() {
     }
 
     // Camera
-    // if (cam_move_up)    move_camera(window, main_camera,    0.0, -600.0, dt);
-    // if (cam_move_down)  move_camera(window, main_camera,    0.0,  600.0, dt);
-    // if (cam_move_left)  move_camera(window, main_camera, -600.0,    0.0, dt);
-    // if (cam_move_right) move_camera(window, main_camera,  600.0,    0.0, dt);
+    if (cam_move_up)    move_camera(window, main_camera,    0.0, -600.0, dt);
+    if (cam_move_down)  move_camera(window, main_camera,    0.0,  600.0, dt);
+    if (cam_move_left)  move_camera(window, main_camera, -600.0,    0.0, dt);
+    if (cam_move_right) move_camera(window, main_camera,  600.0,    0.0, dt);
 
     // Update physics
     Vector2f grav;
@@ -245,7 +252,7 @@ int main() {
         b.apply_force(-grav);
 
         // Process collisions
-        if (dist < a.get_radius() + b.get_radius()) { a.elastic_collide_with(b, dist); }
+        if (dist < a.get_radius() + b.get_radius()) { a.elastic_collide_with(b, dist, dt); }
       }
     }
 
