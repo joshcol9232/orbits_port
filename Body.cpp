@@ -8,8 +8,8 @@
 
 #include <iostream>
 
-
-// #define WALL_BOUNCE
+#define WALL_BOUNCE
+// #define USE_FRICTION
 
 using Eigen::Vector2f;
 
@@ -121,11 +121,7 @@ void Body::elastic_collide_with(Body& other, const float distance, const float d
   std::cout << "dv_1: (" << dv_1.x() << ", " << dv_1.y() << ")" << std::endl;
 #endif
 
-
-  // TODO: Need a function that rotates vector depending on direction of travel.
-  //       So friction is applied in opposite direction
-
-  std::cout << "tangent_normal: " << tangent_normal << std::endl;
+#ifdef USE_FRICTION
   // Friction is the normal force * coefficient.
   // F_f = mu F_n
   // Find force from impulse in collision. F = dp/dt
@@ -149,6 +145,7 @@ void Body::elastic_collide_with(Body& other, const float distance, const float d
 
   v_ += friction_impulse_0 / mass_;
   other.v_ += friction_impulse_1 / other.mass_;
+#endif  // USE_FRICTION
 
   v_ += dv_0 * COLLISION_DAMPING;
   other.v_ += dv_1 * COLLISION_DAMPING;

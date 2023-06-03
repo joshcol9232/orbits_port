@@ -17,15 +17,16 @@ namespace {
 void spawn_square_of_planets(
   std::vector<Body>& bodies,
   Vector2f top_left,
+  Vector2f v,
   const size_t w,
   const size_t h,
   const float rad
 ) {
   for (size_t i = 0; i < w; ++i) {
     for (size_t j = 0; j < h; ++j) {
-      bodies.emplace_back(Vector2f(top_left.x() + static_cast<float>(i) * rad * 2.01,
-                                   top_left.y() + static_cast<float>(j) * rad * 2.01),
-                          Vector2f(0.0, 0.0),
+      bodies.emplace_back(Vector2f(top_left.x() + static_cast<float>(i) * rad * 2.0,
+                                   top_left.y() + static_cast<float>(j) * rad * 2.0),
+                          v,
                           rad);
     }
   }
@@ -91,10 +92,10 @@ void start_state(std::vector<Body>& bodies) {
   bodies.clear();
 
   // spawn_square_of_planets(bodies, Vector2f(600.0, 800.0),
-  //                         2, 2, 50.0);
+  //                         Vector2f(0.0, 0.0), 35, 35, 5.0);
 
-  // spawn_random_planets(bodies, Vector2f(400.0, 400.0),
-  //                      Vector2f(100.0, 100.0), 400, 1.0);
+  // spawn_random_planets(bodies, Vector2f(0.0, 0.0),
+  //                      Vector2f(SCREEN_WIDTH, SCREEN_HEIGHT), 800, 5.0);
 
   // TEST: THREE BODIES INTERSECTING
   // bodies.emplace_back(Vector2f(SCREEN_WIDTH/2.0 - 30.0,
@@ -110,17 +111,25 @@ void start_state(std::vector<Body>& bodies) {
   //                     Vector2f::Zero(),
   //                     100.0);
 
-  // const float orbit_range[2] = {300.0, 400.0};
-  // const float rad_range[2] = {1.0, 8.0};
-  // spawn_planet_with_moons(bodies, Vector2f(SCREEN_WIDTH/2, SCREEN_HEIGHT/2),
+  // --- planets ---
+  const float orbit_range[2] = {150.0, 300.0};
+  const float   rad_range[2] = {1.0  , 5.0  };
+  spawn_planet_with_moons(bodies, Vector2f(SCREEN_WIDTH/2, SCREEN_HEIGHT/2),
+                          Vector2f::Zero(), 100.0, 100, orbit_range,
+                          rad_range, true);
+  // spawn_planet_with_moons(bodies, Vector2f(SCREEN_WIDTH * 1/4, SCREEN_HEIGHT/2),
   //                         Vector2f::Zero(), 100.0, 100, orbit_range,
   //                         rad_range, true);
+  // spawn_planet_with_moons(bodies, Vector2f(SCREEN_WIDTH * 3/4, SCREEN_HEIGHT/2),
+  //                         Vector2f::Zero(), 100.0, 100, orbit_range,
+  //                         rad_range, false);
+  // ---------------
 
-  bodies.emplace_back(Vector2f(400.0, 400.0),
-                      Vector2f(0.0, 0.0),
-                      100.0);
-  // bodies.emplace_back(Vector2f(800.0, 400.0),
-  //                     Vector2f(0.0, -50.0),
+  // bodies.emplace_back(Vector2f(0.0, 0.0),
+  //                     Vector2f(0.0, 0.0),
+  //                     100.0);
+  // bodies.emplace_back(Vector2f(SCREEN_WIDTH, SCREEN_HEIGHT),
+  //                     Vector2f(0.0, 0.0),
   //                     100.0);
 }
 
@@ -189,7 +198,7 @@ int main() {
         const auto drag = mouse_start_pos - curr_mouse_press_pos;
         bodies.emplace_back(Vector2f(mouse_start_pos.x, mouse_start_pos.y),
                             Vector2f(drag.x, drag.y) * 5.0,
-                            mouse_rad, tools::volume_of_sphere(mouse_rad) * PLANET_DENSITY * 10.0);
+                            mouse_rad, tools::volume_of_sphere(mouse_rad) * PLANET_DENSITY * 5.0);
       }
       // -------------
       // --- Keyboard ---
@@ -232,10 +241,10 @@ int main() {
     }
 
     // Camera
-    if (cam_move_up)    move_camera(window, main_camera,    0.0, -600.0, dt);
-    if (cam_move_down)  move_camera(window, main_camera,    0.0,  600.0, dt);
-    if (cam_move_left)  move_camera(window, main_camera, -600.0,    0.0, dt);
-    if (cam_move_right) move_camera(window, main_camera,  600.0,    0.0, dt);
+    // if (cam_move_up)    move_camera(window, main_camera,    0.0, -600.0, dt);
+    // if (cam_move_down)  move_camera(window, main_camera,    0.0,  600.0, dt);
+    // if (cam_move_left)  move_camera(window, main_camera, -600.0,    0.0, dt);
+    // if (cam_move_right) move_camera(window, main_camera,  600.0,    0.0, dt);
 
     // Update physics
     Vector2f grav;
@@ -259,6 +268,21 @@ int main() {
     // Euler step
     for (auto& body : bodies) {
       body.step(dt);
+    }
+
+    // Overlap passes
+    for (size_t o = 0; o < 8; ++o) {
+      for (size_t i = 0; i < bodies.size()-1; ++i) {
+        Body& a = bodies[i];
+        for (size_t j = i+1; j < bodies.size(); ++j) {
+          Body& b = bodies[j];
+
+          auto dist_vec = a.displacement_to(b);
+          auto dist = dist_vec.norm();
+          if (dist < a.get_radius() + b.get_radius())
+            a.correct_overlap_with(b, dist);
+        }
+      }
     }
 
     // Draw
