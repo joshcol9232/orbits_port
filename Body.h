@@ -7,9 +7,9 @@ using Eigen::Vector2f;
 class Body {
 public:
   Body() {}
-  Body(Vector2f pos, Vector2f velocity, float radius);
+  Body(Vector2f pos, Vector2f velocity, float radius, bool charge);
   Body(Vector2f pos, Vector2f velocity,
-       float radius, float mass);
+       float radius, float mass, bool charge);
 
   void draw(sf::RenderWindow& window, sf::CircleShape& circle_mesh) const;
 
@@ -26,4 +26,6 @@ public:
 private:
   Vector2f x_, v_, force_;
   float mass_, radius_;
+
+  float charge_;
 };

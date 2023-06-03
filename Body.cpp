@@ -13,13 +13,14 @@
 
 using Eigen::Vector2f;
 
-Body::Body(Vector2f pos, Vector2f velocity, float radius) :
-  Body(pos, velocity, radius, tools::volume_of_sphere(radius) * PLANET_DENSITY)
+Body::Body(Vector2f pos, Vector2f velocity, float radius, bool charge) :
+  Body(pos, velocity, radius, tools::volume_of_sphere(radius) * PLANET_DENSITY, charge)
 {}
 
 Body::Body(Vector2f pos, Vector2f velocity,
-           float radius, float mass) :
-  x_(pos), v_(velocity), mass_(mass), radius_(radius), force_(0.0, 0.0)
+           float radius, float mass, bool charge) :
+  x_(pos), v_(velocity), mass_(mass), radius_(radius), force_(0.0, 0.0),
+  charge_(charge ? 1.0 : -1.0)
 {}
 
 void Body::step(const float dt) {
@@ -59,7 +60,7 @@ void Body::draw(sf::RenderWindow& window, sf::CircleShape& circle_mesh) const {
 
   circle_mesh.setScale(radius_, radius_);
   circle_mesh.setPosition(x_.x(), x_.y());
-  circle_mesh.setFillColor(sf::Color::White);
+  circle_mesh.setFillColor(std::signbit(charge_) ? sf::Color::Yellow : sf::Color::Red);
   window.draw(circle_mesh);
 }
 
@@ -71,10 +72,17 @@ Vector2f Body::displacement_to(const Body& other) const {
 
 // NOTE: Distance is written to here for use in collisions
 Vector2f Body::force_with(const Body& other, float& distance) const {
-  // Get dist vec
-  Vector2f force = other.x_ - x_;
-  distance = force.norm();
-  force *= G * mass_ * other.mass_ / (distance*distance*distance);
+  // COULOMBS LAW
+  const bool attractive = std::signbit(charge_) ^ std::signbit(other.charge_); // XOR
+  const float modifier = static_cast<float>(attractive) * 2.0 - 1.0;
+
+  const Vector2f dist_vec = other.x_ - x_;
+  distance = dist_vec.norm();
+  Vector2f force = dist_vec * modifier * COULOMB / (distance * distance * distance);
+
+  // gravity
+  // const Vector2f gravForce = dist_vec * G * mass_ * other.mass_ / (distance*distance*distance);
+  // force += gravForce;
   return force;
 }
 
