@@ -2,6 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <Eigen/Dense>
+
 using Eigen::Vector2f;
 
 class Body {
@@ -15,9 +16,12 @@ public:
 
   void step(const float dt);
   void apply_force(const Vector2f& force);
+  void reset_forces() {  force_.x() = 0.0; force_.y() = 0.0; };
   Vector2f force_with(const Body& other, float& distance) const;
   void elastic_collide_with(Body& other, const float distance, const float dt);
   void correct_overlap_with(Body& other, const float distance);
+  
+  void render_force(sf::RenderTarget &target) const;
 
   float get_radius() const { return radius_; }
   float get_mass() const { return mass_; }

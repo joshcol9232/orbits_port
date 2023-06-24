@@ -5,6 +5,7 @@
 
 #include "common.h"
 #include "tools.h"
+#include "SfLine.h"
 
 #include <iostream>
 
@@ -48,10 +49,6 @@ void Body::step(const float dt) {
     x_.y() = SCREEN_HEIGHT - radius_;
   }
 #endif
-
-  // Reset resultant force
-  force_.x() = 0.0;
-  force_.y() = 0.0;
 }
 
 void Body::draw(sf::RenderWindow& window, sf::CircleShape& circle_mesh) const {
@@ -172,4 +169,13 @@ void Body::correct_overlap_with(Body& other, const float distance) {
   // Each needs to be shifted by 1/2 dx r_hat
   x_ += half_dx;
   other.x_ -= half_dx;
+}
+
+void Body::render_force(sf::RenderTarget &target) const {
+  sf::Vector2f start(x_.x(), x_.y());
+  sf::Vector2f force_sfvec(force_.x(), force_.y());
+  force_sfvec *= FORCE_DEBUG_MUL;
+
+  const SfLine line(start, start + force_sfvec);
+  target.draw(line);
 }

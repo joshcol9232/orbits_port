@@ -10,7 +10,8 @@ find_package (SFML REQUIRED system window graphics network audio)
 
 add_executable(orbits_port main.cpp
                Body.h Body.cpp
-               tools.h tools.cpp)
+               tools.h tools.cpp
+               SfLine.h)
 
 target_compile_features (orbits_port PRIVATE cxx_std_20)
 target_link_libraries (orbits_port PRIVATE sfml-audio sfml-graphics sfml-network sfml-system Eigen3::Eigen)

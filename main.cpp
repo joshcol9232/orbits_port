@@ -58,7 +58,7 @@ void start_state(std::vector<Body>& bodies) {
                           Vector2f(0.0, 0.0), 11, 11, 10.0);
 
   // spawn_random_planets(bodies, Vector2f(0.0, 0.0),
-  //                      Vector2f(SCREEN_WIDTH, SCREEN_HEIGHT), 10, 10.0);
+  //                      Vector2f(SCREEN_WIDTH, SCREEN_HEIGHT), 200, 10.0);
 
   // TEST: THREE BODIES INTERSECTING
   // bodies.emplace_back(Vector2f(SCREEN_WIDTH/2.0 - 30.0,
@@ -102,7 +102,7 @@ int main() {
   body_shape.setFillColor(sf::Color::White);
 
   sf::Font font;
-  font.loadFromFile("./Hack-Bold.ttf");
+  font.loadFromFile("./UbuntuMono-B.ttf");
   sf::Text fps_text;
   fps_text.setFont(font);
   fps_text.setString("0");
@@ -128,6 +128,8 @@ int main() {
 
   sf::Clock delta_clock;
   float dt = 1.0/60.0;
+
+  bool renderForce = false;
 
   while (window.isOpen()) {
     sf::Event event;
@@ -155,10 +157,12 @@ int main() {
       // -------------
       // --- Keyboard ---
       if (event.type == sf::Event::KeyPressed) {
-        if(event.key.code == sf::Keyboard::R) {
+        if (event.key.code == sf::Keyboard::R) {
           start_state(bodies);
         } else if (event.key.code == sf::Keyboard::C) {
           bodies.clear();
+        } else if (event.key.code == sf::Keyboard::F) {
+          renderForce = !renderForce;
         }
         // --- CAMERA ---
         cam_move_up    = event.key.code == sf::Keyboard::W;
@@ -240,8 +244,12 @@ int main() {
     // Draw
     window.clear(sf::Color::Black);
 
-    for (const auto& body : bodies) {
+    for (auto& body : bodies) {
       body.draw(window, body_shape);
+      if (renderForce) {
+        body.render_force(window);
+      }
+      body.reset_forces();
     }
 
     // Draw mouse drag
